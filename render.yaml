@@ -39,8 +39,35 @@ services:
     staticPublishPath: "./dist"
     routes:
       - type: rewrite
-        source: "/en"
-        destination: "/en/index.html"
+        source: "/admin"
+        destination: "/admin/index.html"
+      - type: rewrite
+        source: "/admin/*"
+        destination: "/admin/index.html"
+      - type: rewrite
+        source: "/en/games/list"
+        destination: "/en/games/list/index.html"
+      - type: rewrite
+        source: "/en/games/list/*"
+        destination: "/en/games/list/index.html"
+      - type: rewrite
+        source: "/games/list"
+        destination: "/games/list/index.html"
+      - type: rewrite
+        source: "/games/list/*"
+        destination: "/games/list/index.html"
+      - type: rewrite
+        source: "/random_selector"
+        destination: "/random_selector.html"
+      - type: rewrite
+        source: "/random_selector.html"
+        destination: "/random_selector.html"
+      - type: rewrite
+        source: "/en/giveaway/instagram"
+        destination: "/en/giveaway/instagram/index.html"
+      - type: rewrite
+        source: "/en/giveaway/instagram/*"
+        destination: "/en/giveaway/instagram/index.html"
       - type: rewrite
         source: "/giveaway/instagram"
         destination: "/en/giveaway/instagram/index.html"
@@ -51,17 +78,23 @@ services:
         source: "/instagram"
         destination: "/en/giveaway/instagram/index.html"
       - type: rewrite
-        source: "/admin"
-        destination: "/admin/index.html"
-      - type: rewrite
-        source: "/admin/*"
-        destination: "/admin/index.html"
+        source: "/instagram/*"
+        destination: "/en/giveaway/instagram/index.html"
       - type: rewrite
         source: "/app"
         destination: "/app.html"
       - type: rewrite
         source: "/app/*"
         destination: "/app.html"
+      - type: rewrite
+        source: "/en"
+        destination: "/en/index.html"
+      - type: rewrite
+        source: "/en/*"
+        destination: "/index.html"
+      - type: rewrite
+        source: "/*"
+        destination: "/index.html"
     envVars:
       - key: VITE_API_BASE_URL
         fromService:
