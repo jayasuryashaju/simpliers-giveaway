@@ -52,16 +52,16 @@ services:
         destination: "/en/games/list/index.html"
       - type: rewrite
         source: "/games/list"
-        destination: "/games/list/index.html"
+        destination: "/en/games/list/index.html"
       - type: rewrite
         source: "/games/list/*"
-        destination: "/games/list/index.html"
+        destination: "/en/games/list/index.html"
       - type: rewrite
         source: "/random_selector"
-        destination: "/random_selector.html"
+        destination: "/en/games/list/index.html"
       - type: rewrite
         source: "/random_selector.html"
-        destination: "/random_selector.html"
+        destination: "/en/games/list/index.html"
       - type: rewrite
         source: "/en/giveaway/instagram"
         destination: "/en/giveaway/instagram/index.html"

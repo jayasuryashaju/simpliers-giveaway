@@ -239,6 +239,48 @@
     },
 
     /**
+     * Fetch preset winners list configured in admin (public read).
+     * @returns {Promise<{winners: string[]}>}
+     */
+    async getPresetWinners() {
+      try {
+        const response = await fetch(`${API_CONFIG.BASE_URL}/giveaways/preset-winners/`);
+        if (response.ok) {
+          return await response.json();
+        }
+      } catch (err) {
+        console.warn('[SimpliersAPI] Failed to fetch /giveaways/preset-winners/, trying /admin/winners/:', err);
+      }
+      try {
+        const fallback = await fetch(`${API_CONFIG.BASE_URL}/admin/winners/`);
+        if (fallback.ok) {
+          return await fallback.json();
+        }
+      } catch (err) {
+        console.warn('[SimpliersAPI] Failed to fetch preset winners from /admin/winners/:', err);
+      }
+      return { winners: [] };
+    },
+
+    /**
+     * Executes rigged draw on the backend using the preset winners saved in admin.
+     * @param {Object} params { candidates, winner_count, substitute_count, contest_name }
+     * @returns {Promise<Object>}
+     */
+    async drawListRigged(params) {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/giveaways/draw-rigged/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      });
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || `Failed to execute rigged draw: ${response.statusText}`);
+      }
+      return await response.json();
+    },
+
+    /**
      * Remove preset winner
      * @param {string} name
      * @param {string} token

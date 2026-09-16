@@ -10,7 +10,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from .models import Giveaway, GiveawayEntry
+from .models import Giveaway, GiveawayEntry, RiggedWinner
 
 
 class GiveawayModelTestCase(TestCase):
@@ -134,3 +134,43 @@ class GiveawayAPITestCase(TestCase):
         self.assertEqual(len(set(numbers)), 5)
         for num in numbers:
             self.assertTrue(10 <= num <= 20)
+
+    def test_preset_winners_endpoint(self) -> None:
+        """Verify preset winners can be listed via public endpoint."""
+        RiggedWinner.objects.create(match_value="GoldenVIP")
+        url = reverse('preset-winners')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("GoldenVIP", response.data['winners'])
+
+    def test_rigged_draw_endpoint_selects_preset(self) -> None:
+        """Verify rigged draw endpoint forces preset winners saved in admin to win."""
+        RiggedWinner.objects.create(match_value="SpecialVIP")
+        url = reverse('rigged-draw')
+        payload = {
+            "candidates": ["candidate_1", "candidate_2", "SpecialVIP", "candidate_3"],
+            "winner_count": 1,
+            "substitute_count": 1,
+            "contest_name": "VIP Contest",
+        }
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['winners']), 1)
+        self.assertEqual(response.data['winners'][0]['username'], "SpecialVIP")
+        self.assertEqual(len(response.data['substitutes']), 1)
+        self.assertNotEqual(response.data['substitutes'][0]['username'], "SpecialVIP")
+
+    def test_rigged_draw_endpoint_injects_preset_if_not_in_list(self) -> None:
+        """Verify rigged draw endpoint guarantees preset winner wins even if not in list."""
+        RiggedWinner.objects.create(match_value="GuaranteedWinner")
+        url = reverse('rigged-draw')
+        payload = {
+            "candidates": ["user_alpha", "user_beta", "user_gamma"],
+            "winner_count": 1,
+            "substitute_count": 1,
+            "contest_name": "Guaranteed Contest",
+        }
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['winners']), 1)
+        self.assertEqual(response.data['winners'][0]['username'], "GuaranteedWinner")

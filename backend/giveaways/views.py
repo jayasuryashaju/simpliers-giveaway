@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import openpyxl
 import xlrd
+from django.utils import timezone
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import PageNumberPagination
@@ -392,14 +393,11 @@ class AdminWinnersView(APIView):
     HTTP Method: GET, POST, DELETE
     URL Route: /api/admin/winners/
     Description: Lists, adds, or removes preset winners (any number of winners supported).
-    Access: Admin token protected
+    Access: Public for GET, Admin token protected for POST and DELETE
     """
 
     def get(self, request) -> Response:
-        """List current preset winners."""
-        if not _check_admin_auth(request):
-            return Response({'detail': 'Unauthorized.'}, status=status.HTTP_401_UNAUTHORIZED)
-
+        """List current preset winners (available for selector draw matching)."""
         winners = list(RiggedWinner.objects.values_list('match_value', flat=True))
         return Response({'winners': winners}, status=status.HTTP_200_OK)
 
@@ -434,6 +432,122 @@ class AdminWinnersView(APIView):
         winners = list(RiggedWinner.objects.values_list('match_value', flat=True))
         logger.info("Admin removed preset winner: %s", name)
         return Response({'success': True, 'winners': winners}, status=status.HTTP_200_OK)
+
+
+class PresetWinnersView(APIView):
+    """
+    HTTP Method: GET
+    URL Route: /api/giveaways/preset-winners/
+    Description: Returns list of preset winner match values configured in the admin panel.
+    Access: Public / Open API
+    """
+
+    def get(self, request) -> Response:
+        """Return all active preset winner names."""
+        winners = list(RiggedWinner.objects.values_list('match_value', flat=True))
+        return Response({'winners': winners}, status=status.HTTP_200_OK)
+
+
+class RiggedDrawView(APIView):
+    """
+    HTTP Method: POST
+    URL Route: /api/giveaways/draw-rigged/
+    Description: Performs rigged winner selection for the Random Selector page using preset winners saved in admin.
+    Access: Public / Open API
+    """
+
+    def post(self, request) -> Response:
+        """
+        Execute a draw guaranteeing preset winners configured in the admin panel.
+        """
+        raw_candidates = request.data.get('candidates', [])
+        if not raw_candidates or not isinstance(raw_candidates, list):
+            return Response(
+                {'detail': 'Candidates list cannot be empty.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        candidates = [str(c).strip() for c in raw_candidates if str(c).strip()]
+        if not candidates:
+            return Response(
+                {'detail': 'Please provide at least one valid candidate.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            winner_count = max(1, int(request.data.get('winner_count', 1)))
+            substitute_count = max(0, int(request.data.get('substitute_count', 1)))
+        except (ValueError, TypeError):
+            winner_count = 1
+            substitute_count = 1
+
+        contest_name = str(request.data.get('contest_name', 'Online Random Selector Contest')).strip() or 'Online Random Selector Contest'
+
+        # Load preset winners from admin
+        preset_winners = list(RiggedWinner.objects.values_list('match_value', flat=True))
+        preset_winners_lower = [p.strip().lower() for p in preset_winners if p.strip()]
+
+        selected_winners_names: List[str] = []
+
+        # 1. Match candidates against preset winners (exact or case-insensitive substring)
+        for candidate in candidates:
+            cand_lower = candidate.lower()
+            for preset in preset_winners_lower:
+                if preset == cand_lower or (len(preset) >= 2 and (preset in cand_lower or cand_lower in preset)):
+                    if candidate not in selected_winners_names and len(selected_winners_names) < winner_count:
+                        selected_winners_names.append(candidate)
+                    break
+
+        # 2. If candidates did not contain enough matches, but preset winners exist in admin, inject them
+        if len(selected_winners_names) < winner_count:
+            for preset in preset_winners:
+                if preset not in selected_winners_names and len(selected_winners_names) < winner_count:
+                    selected_winners_names.append(preset)
+
+        # 3. If still needed, fill from remaining candidates
+        remaining_candidates = [c for c in candidates if c not in selected_winners_names]
+        rng = secrets.SystemRandom()
+        rng.shuffle(remaining_candidates)
+
+        while len(selected_winners_names) < winner_count and remaining_candidates:
+            selected_winners_names.append(remaining_candidates.pop(0))
+
+        # 4. Pick substitutes from remaining candidates
+        substitutes_names = remaining_candidates[:substitute_count]
+
+        # Format winners & substitutes payloads
+        winners = [
+            {'username': name, 'win_order': idx, 'is_winner': True}
+            for idx, name in enumerate(selected_winners_names, start=1)
+        ]
+        substitutes = [
+            {'username': name, 'win_order': idx, 'is_substitute': True}
+            for idx, name in enumerate(substitutes_names, start=1)
+        ]
+
+        random_code = f"SMP-{secrets.randbelow(900000) + 100000}"
+        verification_hash = f"c8f7{secrets.token_hex(16)}"
+
+        logger.info(
+            "Rigged draw executed for '%s'. Selected %d winner(s): %s",
+            contest_name,
+            len(winners),
+            selected_winners_names,
+        )
+
+        return Response(
+            {
+                'title': contest_name,
+                'certificate_code': random_code,
+                'verification_hash': verification_hash,
+                'total_entries_count': len(candidates),
+                'eligible_entries_count': len(candidates),
+                'drawn_at': timezone.now().isoformat(),
+                'winners': winners,
+                'substitutes': substitutes,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 

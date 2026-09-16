@@ -171,6 +171,23 @@ function multiPageRouter() {
         }
 
 
+        // Online Random Selector page (/en/games/list, /games/list, /random_selector)
+        if (
+          url === '/en/games/list' ||
+          url === '/en/games/list/' ||
+          url === '/games/list' ||
+          url === '/games/list/' ||
+          url === '/random_selector' ||
+          url === '/random_selector.html'
+        ) {
+          const filePath = path.resolve(__dirname, 'public/en/games/list/index.html')
+          if (fs.existsSync(filePath)) {
+            res.setHeader('Content-Type', 'text/html; charset=utf-8')
+            res.end(fs.readFileSync(filePath, 'utf-8'))
+            return
+          }
+        }
+
         // Admin panel (/admin)
         if (
           url === '/admin' ||

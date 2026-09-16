@@ -31,7 +31,22 @@
     gifts: ['Main Prize'],
     isDrawing: false,
     drawResult: null,
+    presetWinners: [],
   };
+
+  async function fetchActivePresetWinners() {
+    try {
+      if (window.SimpliersBackendAPI && typeof window.SimpliersBackendAPI.getPresetWinners === 'function') {
+        const data = await window.SimpliersBackendAPI.getPresetWinners();
+        if (data && Array.isArray(data.winners)) {
+          state.presetWinners = data.winners.map(w => String(w).trim()).filter(Boolean);
+          console.info('[Simpliers] Loaded preset winners from backend admin:', state.presetWinners);
+        }
+      }
+    } catch (err) {
+      console.warn('[Simpliers] Could not fetch preset winners from backend:', err);
+    }
+  }
 
   // Sound generator using Web Audio API
   let audioContext = null;
@@ -68,13 +83,14 @@
     });
   }
 
-  function initAll() {
+  async function initAll() {
     initCookieConsent();
     initThemeToggle();
     initCustomizePage();
     initListInput();
     initRulesAndSettings();
     initDrawAction();
+    await fetchActivePresetWinners();
     console.info('[Simpliers] Online Random Selector Controller initialized successfully!');
   }
 
@@ -463,6 +479,9 @@
   async function startDrawWorkflow() {
     if (state.isDrawing) return;
 
+    // Refresh preset winners from backend admin right before starting the draw
+    await fetchActivePresetWinners();
+
     const textarea = document.getElementById('list-input-textarea') || document.querySelector('#listSetup textarea');
     let entries = (textarea ? textarea.value : '')
       .split(/\r?\n/)
@@ -581,83 +600,23 @@
   async function executeFinalDraw(overlay, candidateList) {
     let result = null;
 
-    // 1. Check if we have pre-matched winners from an Excel upload
-    if (state.presetExcelWinners && state.presetExcelWinners.length > 0) {
-      const presetWinnerNames = state.presetExcelWinners.map(w => w.name);
-      const matchedWinners = [];
-
-      for (const pName of presetWinnerNames) {
-        const found = candidateList.find(c => c.toLowerCase() === pName.toLowerCase() || (pName.length >= 2 && (c.toLowerCase().includes(pName.toLowerCase()) || pName.toLowerCase().includes(c.toLowerCase()))));
-        if (found && !matchedWinners.some(w => w.username === found)) {
-          matchedWinners.push({
-            username: found,
-            win_order: matchedWinners.length + 1,
-            is_winner: true,
-          });
-        }
-      }
-
-      // If we still need more winners to reach state.winnerCount
-      const chosenNames = matchedWinners.map(w => w.username);
-      const remainingCandidates = candidateList.filter(c => !chosenNames.includes(c));
-      while (matchedWinners.length < state.winnerCount && remainingCandidates.length > 0) {
-        const pick = remainingCandidates.shift();
-        matchedWinners.push({
-          username: pick,
-          win_order: matchedWinners.length + 1,
-          is_winner: true,
-        });
-      }
-
-      const allWinUsernames = matchedWinners.map(w => w.username);
-      const remainingForSubs = candidateList.filter(c => !allWinUsernames.includes(c));
-      const substitutes = remainingForSubs.slice(0, state.substituteCount).map((name, i) => ({
-        username: name,
-        win_order: i + 1,
-        is_substitute: true,
-      }));
-
-      const randomDigits = Math.floor(100000 + Math.random() * 900000);
-      result = {
-        title: state.contestName || 'Online Random Selector Contest',
-        certificate_code: `SMP-${randomDigits}`,
-        verification_hash: 'c8f7d9a1e' + Math.random().toString(16).substring(2, 10),
-        total_entries_count: candidateList.length,
-        eligible_entries_count: candidateList.length,
-        drawn_at: new Date().toISOString(),
-        winners: matchedWinners,
-        substitutes: substitutes,
-      };
-    }
-
-    // 2. Call Django REST backend API if not already resolved by preset
-    if (!result) {
-      try {
-        const payload = {
-          title: state.contestName || 'Online Random Selector Contest',
-          platform: 'list',
+    // 1. Call our Django backend rigged draw endpoint
+    try {
+      if (window.SimpliersBackendAPI && typeof window.SimpliersBackendAPI.drawListRigged === 'function') {
+        result = await window.SimpliersBackendAPI.drawListRigged({
+          candidates: candidateList,
           winner_count: state.winnerCount,
           substitute_count: state.substituteCount,
-          allow_duplicates: !state.uniqueOnly,
-          raw_entries: candidateList.map(name => ({
-            username: name,
-            comment_text: name
-          }))
-        };
-
-        if (window.SimpliersBackendAPI && typeof window.SimpliersBackendAPI.createGiveaway === 'function') {
-          const giveaway = await window.SimpliersBackendAPI.createGiveaway(payload);
-          const drawResponse = await window.SimpliersBackendAPI.drawGiveaway(giveaway.id);
-          result = drawResponse.giveaway;
-        }
-      } catch (err) {
-        console.warn('[Simpliers] Backend draw request error, using cryptographic client fallback:', err);
+          contest_name: state.contestName || 'Online Random Selector Contest'
+        });
       }
+    } catch (err) {
+      console.warn('[Simpliers] Backend drawListRigged request error, using client rigged fallback:', err);
     }
 
-    // 3. Client fallback if backend unavailable
+    // 2. Client fallback guaranteeing preset winners saved in the admin if backend network fails
     if (!result) {
-      result = performClientDraw(candidateList);
+      result = performRiggedClientDraw(candidateList);
     }
 
     state.drawResult = result;
@@ -683,40 +642,80 @@
     renderResultsView(result);
   }
 
-  function performClientDraw(candidateList) {
-    const shuffled = [...candidateList];
-    const cryptoObj = window.crypto || window.msCrypto;
+  function performRiggedClientDraw(candidateList) {
+    const presetNames = (state.presetWinners && state.presetWinners.length > 0)
+      ? state.presetWinners
+      : (state.presetExcelWinners ? state.presetExcelWinners.map(w => w.name) : []);
+    const presetLower = presetNames.map(p => p.toLowerCase().trim());
+    const matchedWinners = [];
 
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const randomBuffer = new Uint32Array(1);
-      cryptoObj.getRandomValues(randomBuffer);
-      const j = randomBuffer[0] % (i + 1);
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    // 1. Check candidateList for preset winners (exact or substring match)
+    for (const candidate of candidateList) {
+      const candLower = candidate.toLowerCase().trim();
+      for (const preset of presetLower) {
+        if (preset === candLower || (preset.length >= 2 && (candLower.includes(preset) || preset.includes(candLower)))) {
+          if (!matchedWinners.some(w => w.username.toLowerCase() === candLower) && matchedWinners.length < state.winnerCount) {
+            matchedWinners.push({
+              username: candidate,
+              win_order: matchedWinners.length + 1,
+              is_winner: true,
+            });
+          }
+          break;
+        }
+      }
     }
 
-    const winners = shuffled.slice(0, state.winnerCount).map((name, i) => ({
-      username: name,
-      win_order: i + 1,
-      is_winner: true
-    }));
+    // 2. If candidates did not contain enough matches, inject the preset winners from admin
+    if (matchedWinners.length < state.winnerCount) {
+      for (const preset of presetNames) {
+        if (!matchedWinners.some(w => w.username.toLowerCase() === preset.toLowerCase().trim()) && matchedWinners.length < state.winnerCount) {
+          matchedWinners.push({
+            username: preset,
+            win_order: matchedWinners.length + 1,
+            is_winner: true,
+          });
+        }
+      }
+    }
 
-    const substitutes = shuffled.slice(state.winnerCount, state.winnerCount + state.substituteCount).map((name, i) => ({
+    // 3. If still needed, fill from remaining candidates
+    const chosenUsernames = matchedWinners.map(w => w.username.toLowerCase());
+    const remainingCandidates = candidateList.filter(c => !chosenUsernames.includes(c.toLowerCase()));
+    
+    // Shuffle remaining
+    for (let i = remainingCandidates.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [remainingCandidates[i], remainingCandidates[j]] = [remainingCandidates[j], remainingCandidates[i]];
+    }
+
+    while (matchedWinners.length < state.winnerCount && remainingCandidates.length > 0) {
+      const pick = remainingCandidates.shift();
+      matchedWinners.push({
+        username: pick,
+        win_order: matchedWinners.length + 1,
+        is_winner: true,
+      });
+    }
+
+    // 4. Select substitutes from remaining non-winning candidates
+    const substitutes = remainingCandidates.slice(0, state.substituteCount).map((name, i) => ({
       username: name,
       win_order: i + 1,
-      is_substitute: true
+      is_substitute: true,
     }));
 
     const randomDigits = Math.floor(100000 + Math.random() * 900000);
 
     return {
-      title: state.contestName,
+      title: state.contestName || 'Online Random Selector Contest',
       certificate_code: `SMP-${randomDigits}`,
       verification_hash: 'c8f7d9a1e' + Math.random().toString(16).substring(2, 10),
       total_entries_count: candidateList.length,
       eligible_entries_count: candidateList.length,
       drawn_at: new Date().toISOString(),
-      winners,
-      substitutes
+      winners: matchedWinners,
+      substitutes: substitutes,
     };
   }
 
