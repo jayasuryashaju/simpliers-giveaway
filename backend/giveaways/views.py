@@ -12,6 +12,7 @@ import uuid
 from typing import Any, Dict, List, Optional, Tuple
 
 import openpyxl
+import xlrd
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import PageNumberPagination
@@ -399,7 +400,6 @@ class AdminWinnersView(APIView):
         if not _check_admin_auth(request):
             return Response({'detail': 'Unauthorized.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        from .models import RiggedWinner
         winners = list(RiggedWinner.objects.values_list('match_value', flat=True))
         return Response({'winners': winners}, status=status.HTTP_200_OK)
 
@@ -412,7 +412,6 @@ class AdminWinnersView(APIView):
         if not name:
             return Response({'detail': 'Winner value is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        from .models import RiggedWinner
         if RiggedWinner.objects.filter(match_value__iexact=name).exists():
             winners = list(RiggedWinner.objects.values_list('match_value', flat=True))
             return Response({'detail': 'This winner is already in the list.', 'winners': winners}, status=status.HTTP_200_OK)
@@ -431,7 +430,6 @@ class AdminWinnersView(APIView):
         if not name:
             return Response({'detail': 'Winner value to delete is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        from .models import RiggedWinner
         RiggedWinner.objects.filter(match_value__iexact=name).delete()
         winners = list(RiggedWinner.objects.values_list('match_value', flat=True))
         logger.info("Admin removed preset winner: %s", name)
@@ -454,7 +452,6 @@ def _parse_excel_file(file_obj) -> Tuple[List[str], List[Dict]]:
     except Exception:
         # Attempt legacy .xls via xlrd fallback
         try:
-            import xlrd  # noqa: PLC0415
             book = xlrd.open_workbook(file_contents=content)
             sheet = book.sheet_by_index(0)
             headers = [str(sheet.cell_value(0, c)).strip() for c in range(sheet.ncols)]

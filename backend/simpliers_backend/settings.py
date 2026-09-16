@@ -25,15 +25,22 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-d#d2#5c73&by@v89@=s27+9idr
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
 # Host configuration for production and local environments
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'testserver',
+    '.onrender.com',
+    'simpliers-backend.onrender.com',
+    'simpliers-frontend.onrender.com',
+]
 
 render_external_hostname = os.getenv('RENDER_EXTERNAL_HOSTNAME')
-if render_external_hostname:
+if render_external_hostname and render_external_hostname not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(render_external_hostname)
 
 custom_allowed_hosts = os.getenv('ALLOWED_HOSTS')
 if custom_allowed_hosts:
-    ALLOWED_HOSTS.extend([host.strip() for host in custom_allowed_hosts.split(',') if host.strip()])
+    ALLOWED_HOSTS.extend([host.strip() for host in custom_allowed_hosts.split(',') if host.strip() and host.strip() not in ALLOWED_HOSTS])
 elif not render_external_hostname and DEBUG:
     ALLOWED_HOSTS.append('*')
 
@@ -51,10 +58,10 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -124,13 +131,53 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS Settings
+# CORS Settings (Allow cross-origin requests from frontend static site)
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    'https://simpliers-frontend.onrender.com',
+    'https://simpliers-backend.onrender.com',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.onrender\.com$",
+    r"^http://localhost:\d+$",
+    r"^http://127\.0\.0\.1:\d+$",
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
 
 # CSRF Trusted Origins for HTTPS on Render
 CSRF_TRUSTED_ORIGINS = [
     'https://*.onrender.com',
+    'https://simpliers-frontend.onrender.com',
+    'https://simpliers-backend.onrender.com',
     'http://localhost:5173',
     'http://127.0.0.1:5173',
 ]

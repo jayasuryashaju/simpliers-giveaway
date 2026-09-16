@@ -11,13 +11,22 @@
   // Configurable base URL for the backend API
   // Automatically detects production host or local dev server
   function resolveDefaultBaseUrl() {
-    if (window.CUSTOM_BACKEND_URL) return window.CUSTOM_BACKEND_URL.replace(/\/+$/, '');
-    if (window.RENDER_BACKEND_URL) return window.RENDER_BACKEND_URL.replace(/\/+$/, '');
-    const host = window.location.hostname;
-    if (host !== 'localhost' && host !== '127.0.0.1' && host !== '') {
-      return window.location.origin + '/api';
+    if (window.CUSTOM_BACKEND_URL && window.CUSTOM_BACKEND_URL.trim()) {
+      return window.CUSTOM_BACKEND_URL.trim().replace(/\/+$/, '');
     }
-    return 'http://127.0.0.1:8000/api';
+    if (window.RENDER_BACKEND_URL && window.RENDER_BACKEND_URL.trim()) {
+      return window.RENDER_BACKEND_URL.trim().replace(/\/+$/, '');
+    }
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1' || host === '') {
+      return 'http://127.0.0.1:8000/api';
+    }
+    // On Render, automatically connect frontend to backend service
+    if (host.includes('onrender.com')) {
+      const backendHost = host.replace('-frontend', '-backend');
+      return `https://${backendHost}/api`;
+    }
+    return `${window.location.origin}/api`;
   }
 
   const API_CONFIG = {

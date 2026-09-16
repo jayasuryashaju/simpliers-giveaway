@@ -1,8 +1,15 @@
 /**
  * Simpliers Runtime Environment Configuration
  * 
- * If hosting frontend and backend on separate domains on Render,
- * you can optionally specify the backend API URL here:
- * e.g., window.CUSTOM_BACKEND_URL = 'https://simpliers-backend.onrender.com/api';
+ * Automatically connects to Render backend when hosted, and localhost when developing locally.
  */
-window.CUSTOM_BACKEND_URL = window.CUSTOM_BACKEND_URL || '';
+(function(window) {
+  if (!window.CUSTOM_BACKEND_URL) {
+    var host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1' || host === '') {
+      window.CUSTOM_BACKEND_URL = 'http://127.0.0.1:8000/api';
+    } else {
+      window.CUSTOM_BACKEND_URL = 'https://simpliers-backend.onrender.com/api';
+    }
+  }
+})(window);
