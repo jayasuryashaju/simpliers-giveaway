@@ -1,0 +1,1 @@
+function e(){return new Promise((a,r)=>{if(!navigator.clipboard){r(new Error("clipboard-unsupported"));return}requestAnimationFrame(()=>{setTimeout(()=>{navigator.clipboard.readText().then(a).catch(r)},0)})})}export{e as r};

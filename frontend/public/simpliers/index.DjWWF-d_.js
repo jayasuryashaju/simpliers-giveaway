@@ -1,0 +1,1 @@
+import{s as r}from"./entry.6yUwhpju.js";import{_ as s}from"./vue-core.Bgzymd3L.js";const t={setup(){r({statusCode:404})}};function o(e,n,a,c,p,_){return null}const d=s(t,[["render",o]]);export{d as default};

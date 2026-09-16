@@ -1,0 +1,1 @@
+import{g as t}from"./entry.6yUwhpju.js";import{_ as e,c,N as n,o as s}from"./vue-core.Bgzymd3L.js";const _={components:{}},a={class:"py-10"};function r(p,m,d,f,i,u){const o=t;return s(),c("div",a,[n(o)])}const $=e(_,[["render",r]]);export{$ as default};

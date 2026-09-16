@@ -1,0 +1,1 @@
+import{g as e}from"./entry.6yUwhpju.js";import{u as t}from"./usePageMeta.q-atxqo1.js";import{_ as n,c,N as r,o as a}from"./vue-core.Bgzymd3L.js";const s={setup(){t({meta:[{name:"robots",content:"noindex"}]})},scrollToTop:!0};function _(p,m,u,f,i,l){const o=e;return a(),c("div",null,[r(o)])}const g=n(s,[["render",_]]);export{g as default};

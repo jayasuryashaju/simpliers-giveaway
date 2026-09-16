@@ -1,0 +1,1 @@
+import{s as t}from"./entry.6yUwhpju.js";import{_ as o,c as e,o as r}from"./vue-core.Bgzymd3L.js";const a={components:{},setup(){return t({statusCode:404,statusMessage:"Page Not Found"})}};function n(s,c,u,p,_,d){return r(),e("div")}const i=o(a,[["render",n]]);export{i as default};

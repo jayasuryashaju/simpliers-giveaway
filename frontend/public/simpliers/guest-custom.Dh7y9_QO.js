@@ -1,0 +1,1 @@
+import{a2 as a,n,y as s,a3 as c}from"./entry.6yUwhpju.js";import"./vue-core.Bgzymd3L.js";const g=a((e,d)=>{const r=n(),u=s(),t=e.query.redirect||e.query.Redirect||e.query.REDIRECT||null;if(console.log("guest-custom middleware invoked",r.loggedIn,t),r.loggedIn){let o=u({name:"account-index"});return t&&({...e.query},o=t),c(o,{external:!0})}});export{g as default};

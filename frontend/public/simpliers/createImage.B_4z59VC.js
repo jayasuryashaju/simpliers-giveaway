@@ -1,0 +1,1 @@
+import{z as t}from"./entry.48JRomLB.js";const s=t("createImage",{state:()=>({username:"",profilePicture:"",title:"",description:"",image:"/images/theme/img/documentation/img8.jpg"}),actions:{setUsername(e){this.username=e},setProfilePicture(e){this.profilePicture=e},setTitle(e){this.title=e},setDescription(e){this.description=e},setImage(e){this.image=e}}});export{s as u};

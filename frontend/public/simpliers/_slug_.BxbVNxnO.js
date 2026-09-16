@@ -1,0 +1,1 @@
+import{s as t}from"./entry.6yUwhpju.js";import{_ as e,c as o,o as r}from"./vue-core.Bgzymd3L.js";const a={components:{},setup(){return t({statusCode:410,statusMessage:"Page is gone"})}};function n(s,c,p,u,_,d){return r(),o("div")}const m=e(a,[["render",n]]);export{m as default};

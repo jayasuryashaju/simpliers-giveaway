@@ -1,0 +1,21 @@
+# ─── Core Framework ───────────────────────────────────────────────────────────
+Django==5.2.8
+
+# ─── Django REST Framework ────────────────────────────────────────────────────
+djangorestframework==3.16.0
+
+# ─── CORS Headers ─────────────────────────────────────────────────────────────
+django-cors-headers==4.7.0
+
+# ─── Excel File Parsing ───────────────────────────────────────────────────────
+openpyxl==3.1.5
+xlrd==2.0.1
+
+# ─── Database (PostgreSQL & Database URL support) ─────────────────────────────
+psycopg2-binary>=2.9.9
+dj-database-url>=2.1.0
+
+# ─── Production Server & Static Assets ────────────────────────────────────────
+gunicorn>=21.2.0
+whitenoise>=6.6.0
+python-dotenv>=1.0.1

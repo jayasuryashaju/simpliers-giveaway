@@ -1,0 +1,1 @@
+import{_ as s,c as o,Z as a,o as n}from"./vue-core.Bgzymd3L.js";const t={name:"NewBadge"},c={class:"badge badge-success"};function r(e,p,_,d,g,i){return n(),o("span",c,a(e.$t("components.globalComponents.newBadge")),1)}const m=s(t,[["render",r]]);export{m as N};

@@ -1,0 +1,1 @@
+import{_ as s,c as t,o,a0 as a}from"./vue-core.Bgzymd3L.js";const c={},r={class:"bg-base-100"};function n(e,_,d,l,f,p){return o(),t("div",r,[a(e.$slots,"default")])}const u=s(c,[["render",n]]);export{u as default};

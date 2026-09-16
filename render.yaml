@@ -1,0 +1,69 @@
+databases:
+  # 1. Managed PostgreSQL Database
+  - name: simpliers-db
+    databaseName: simpliers_db
+    user: simpliers_user
+    plan: free
+    region: oregon
+
+services:
+  # 2. Django REST API Backend Web Service
+  - type: web
+    name: simpliers-backend
+    runtime: python
+    plan: free
+    region: oregon
+    rootDir: backend
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn simpliers_backend.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.2
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: simpliers-db
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        value: "*"
+
+  # 3. React / Vite Static Frontend
+  - type: web
+    name: simpliers-frontend
+    runtime: static
+    plan: free
+    region: oregon
+    rootDir: frontend
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: "./dist"
+    routes:
+      - type: rewrite
+        source: "/giveaway/instagram"
+        destination: "/en/giveaway/instagram/index.html"
+      - type: rewrite
+        source: "/giveaway/instagram/*"
+        destination: "/en/giveaway/instagram/index.html"
+      - type: rewrite
+        source: "/instagram"
+        destination: "/en/giveaway/instagram/index.html"
+      - type: rewrite
+        source: "/admin"
+        destination: "/admin/index.html"
+      - type: rewrite
+        source: "/admin/*"
+        destination: "/admin/index.html"
+      - type: rewrite
+        source: "/app"
+        destination: "/app.html"
+      - type: rewrite
+        source: "/app/*"
+        destination: "/app.html"
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: simpliers-backend
+          property: host

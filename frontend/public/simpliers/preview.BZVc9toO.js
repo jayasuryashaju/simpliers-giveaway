@@ -1,0 +1,1 @@
+import{_ as t,c as o,o as n,a0 as s}from"./vue-core.Bgzymd3L.js";const r={name:"PreviewLayout",head(){return{title:"Kart Önizleme - Simpliers",meta:[{name:"robots",content:"noindex, nofollow"}]}}},a={class:"bg-base-200 min-h-screen"};function c(e,i,l,d,m,p){return n(),o("div",a,[s(e.$slots,"default")])}const f=t(r,[["render",c]]);export{f as default};

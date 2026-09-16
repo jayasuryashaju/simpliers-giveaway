@@ -1,0 +1,1 @@
+import{a2 as u,n as a,y as r}from"./entry.6yUwhpju.js";import"./vue-core.Bgzymd3L.js";const i=u((e,s)=>{const t=a(),o=r();if(!t.loggedIn)return o({name:"auth-login",query:{redirect:e.fullPath}})});export{i as default};

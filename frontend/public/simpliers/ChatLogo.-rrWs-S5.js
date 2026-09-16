@@ -1,0 +1,1 @@
+import{_ as a,c as o,$ as r,o as e}from"./vue-core.Bgzymd3L.js";const s={props:{colorClass:{type:String,default:"bg-gradient-to-r from-primary to-chat bg-clip-text text-transparent"}}};function n(c,l,t,p,f,i){return e(),o("span",{class:r(["brand-name font-bold",t.colorClass]),translate:"no"},"CHAT",2)}const d=a(s,[["render",n]]);export{d as default};

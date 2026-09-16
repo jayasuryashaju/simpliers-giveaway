@@ -1,0 +1,1 @@
+import{_ as o,c as s,a3 as t,o as e}from"./vue-core.Bgzymd3L.js";const l={};function d(n,a,c,r,p,i){return e(),s("div",null,[...a[0]||(a[0]=[t("ins",{class:"adsbygoogle",style:{display:"block"},"data-ad-format":"fluid","data-ad-client":"ca-pub-1642683120098452","data-ad-slot":"8766560818"},null,-1)])])}const u=o(l,[["render",d]]);export{u as T};

@@ -1,0 +1,1 @@
+import{_ as r,c as t,o as a,$ as s}from"./vue-core.Bgzymd3L.js";const e={props:{colorClass:{type:String,default:"bg-gradient-to-r from-primary to-forms bg-clip-text text-transparent"}}};function n(c,l,o,p,m,f){return a(),t("span",{class:s(["brand-name font-normal",o.colorClass]),translate:"no"},"Forms",2)}const _=r(e,[["render",n]]);export{_ as default};

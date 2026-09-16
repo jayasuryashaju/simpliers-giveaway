@@ -1,0 +1,1 @@
+import{g as s}from"./entry.6yUwhpju.js";import{_ as r,X as p,o as a}from"./vue-core.Bgzymd3L.js";const _={emits:["updateTitle"]};function c(o,t,i,m,f,u){const e=s;return a(),p(e,{onUpdateTitle:t[0]||(t[0]=n=>o.$emit("updateTitle",n))})}const $=r(_,[["render",c]]);export{$ as default};

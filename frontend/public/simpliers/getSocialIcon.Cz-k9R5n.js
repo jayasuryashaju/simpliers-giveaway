@@ -1,0 +1,1 @@
+function r(t){return t==="instagram"?"fa-brands fa-instagram":t==="facebook"?"fa-brands fa-facebook":t==="twitter"?"fa-brands fa-x-twitter":t==="tiktok"?"fa-brands fa-tiktok":t==="youtube"?"fa-brands fa-youtube":"fa fa-question"}export{r as g};

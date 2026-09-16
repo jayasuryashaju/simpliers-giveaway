@@ -1,0 +1,1 @@
+import{z as i}from"./entry.6yUwhpju.js";const o=i("scenario",{state:()=>({isScenariosVisible:!1}),actions:{setScenariosVisible(e){this.isScenariosVisible=e},getScenariosVisible(){return this.isScenariosVisible}}});export{o as u};

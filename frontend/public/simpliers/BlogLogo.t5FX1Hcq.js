@@ -1,0 +1,1 @@
+import{_ as t,c as n,Z as s,o as e}from"./vue-core.Bgzymd3L.js";const a={},r={class:"brand-name text-secondary font-weight-light",translate:"no"};function c(o,p,l,_,i,d){return e(),n("span",r,s(o.$t("components.globalComponents.brands.blog")),1)}const m=t(a,[["render",c]]);export{m as B};

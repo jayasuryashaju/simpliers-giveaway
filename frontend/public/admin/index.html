@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simpliers Admin - Winner Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="/js/backend_api.js"></script>
+  <style>
+    :root {
+      --primary: #e0003b;
+      --primary-hover: #c00032;
+      --bg: #0d1017;
+      --card-bg: rgba(22, 27, 34, 0.85);
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f0f6fc;
+      --muted: #8b949e;
+      --success: #22c55e;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(224, 0, 59, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(34, 197, 94, 0.05) 0%, transparent 40%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      text-decoration: none;
+    }
+
+    .header-logo img {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+    }
+
+    .header-logo h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #fff 40%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-logo span {
+      background: rgba(224, 0, 59, 0.2);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-left: 4px;
+      border: 1px solid rgba(224, 0, 59, 0.3);
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap i {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 13px 16px 13px 44px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 13px 20px;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(224, 0, 59, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(224, 0, 59, 0.5);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-success:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(34, 197, 94, 0.45);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .badge-limit {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: rgba(255, 210, 0, 0.12);
+      color: #ffd200;
+      border: 1px solid rgba(255, 210, 0, 0.3);
+      margin-bottom: 20px;
+    }
+
+    .winner-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .winner-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+
+    .winner-item:hover {
+      background: rgba(34, 197, 94, 0.08);
+      border-color: rgba(34, 197, 94, 0.4);
+    }
+
+    .winner-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .winner-trophy {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 210, 0, 0.15);
+      color: #ffd200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+
+    .winner-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .winner-badge {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .btn-delete {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-delete:hover {
+      background: rgba(239, 68, 68, 0.3);
+      color: #fff;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    .empty-state i {
+      font-size: 32px;
+      margin-bottom: 8px;
+      opacity: 0.5;
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 18px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .alert-success {
+      background: rgba(34, 197, 94, 0.15);
+      color: #86efac;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-link {
+      color: var(--muted);
+      font-size: 13px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover {
+      color: #fff;
+    }
+
+    .quick-creds {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-top: 18px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .quick-creds code {
+      color: var(--primary);
+      background: rgba(224, 0, 59, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="/en/games/list" class="header-logo">
+      <img src="/images/icon.png" alt="Simpliers">
+      <h1>Simpliers</h1>
+      <span>Admin</span>
+    </a>
+
+    <!-- LOGIN PANEL -->
+    <div id="login-panel" class="card">
+      <div class="card-title">
+        <i class="fa fa-lock text-primary" style="color:var(--primary);"></i> Admin Sign In
+      </div>
+      <p class="card-subtitle">Authenticate to configure predetermined contest winners.</p>
+
+      <div id="login-alert" class="alert alert-error"></div>
+
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <div class="input-wrap">
+            <i class="fa fa-user"></i>
+            <input type="text" id="username" class="form-input" placeholder="Enter username" required autocomplete="username">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-wrap">
+            <i class="fa fa-key"></i>
+            <input type="password" id="password" class="form-input" placeholder="Enter password" required autocomplete="current-password">
+          </div>
+        </div>
+
+        <button type="submit" id="btn-login" class="btn btn-primary">
+          <i class="fa fa-sign-in-alt"></i> Sign In to Dashboard
+        </button>
+      </form>
+    </div>
+
+    <!-- WINNER MANAGEMENT DASHBOARD -->
+    <div id="dashboard-panel" class="card" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+        <div>
+          <div class="card-title">
+            <i class="fa fa-crown text-warning" style="color:#ffd200;"></i> Preset Contest Winners
+          </div>
+          <p class="card-subtitle" style="margin-bottom:0;">
+            Pre-saved values matched across all columns when uploading Excel in Random Selector.
+          </p>
+        </div>
+        <button onclick="handleLogout()" class="btn-ghost" style="padding:6px 12px; border-radius:8px; font-size:12px; cursor:pointer;">
+          <i class="fa fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+
+      <div class="badge-limit" style="background:rgba(34,197,94,0.1); border-color:rgba(34,197,94,0.3); color:#86efac;">
+        <i class="fa fa-check-circle"></i> Configure any number of winners. Matches across any column in uploaded Excel.
+      </div>
+
+      <div id="dash-alert" class="alert"></div>
+
+      <!-- Current Winners -->
+      <label class="form-label">Active Preset Winners (<span id="winner-count-label">0</span>)</label>
+      <div id="winner-list" class="winner-list">
+        <!-- Injected dynamically -->
+      </div>
+
+      <!-- Add Winner Form -->
+      <div id="add-winner-section" style="background:rgba(255,255,255,0.03); padding:16px; border-radius:14px; border:1px solid var(--border);">
+        <label class="form-label" style="margin-bottom:8px;">Add New Preset Winner</label>
+        <div style="display:flex; gap:10px;">
+          <div class="input-wrap" style="flex:1;">
+            <i class="fa fa-search"></i>
+            <input type="text" id="new-winner-name" class="form-input" placeholder="e.g. Name, Phone, Email, or Row Value" style="padding-left:42px;">
+          </div>
+          <button type="button" onclick="handleAddWinner()" id="btn-add" class="btn btn-success" style="width:auto; padding:0 20px;">
+            <i class="fa fa-plus"></i> Add
+          </button>
+        </div>
+        <p style="font-size:11px; color:var(--muted); margin-top:8px;">
+          Matches across any column in your Excel file (name, phone, username, etc.).
+        </p>
+      </div>
+
+      <div class="nav-links">
+        <a href="/en/games/list" class="nav-link">
+          <i class="fa fa-arrow-left"></i> Go to Random Selector
+        </a>
+        <a href="javascript:loadWinners()" class="nav-link">
+          <i class="fa fa-sync-alt"></i> Refresh List
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let authToken = localStorage.getItem('simpliers_admin_token') || '';
+
+    // Check token on load
+    window.addEventListener('DOMContentLoaded', () => {
+      if (authToken) {
+        showDashboard();
+        loadWinners();
+      }
+    });
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const userInp = document.getElementById('username').value.trim();
+      const passInp = document.getElementById('password').value.trim();
+      const alertBox = document.getElementById('login-alert');
+      const loginBtn = document.getElementById('btn-login');
+
+      alertBox.style.display = 'none';
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Authenticating...';
+
+      try {
+        const data = await window.SimpliersBackendAPI.adminLogin(userInp, passInp);
+        authToken = data.token;
+        localStorage.setItem('simpliers_admin_token', authToken);
+        showDashboard();
+        loadWinners();
+      } catch (err) {
+        alertBox.textContent = err.message || 'Invalid username or password';
+        alertBox.style.display = 'flex';
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = '<i class="fa fa-sign-in-alt"></i> Sign In to Dashboard';
+      }
+    }
+
+    function handleLogout() {
+      authToken = '';
+      localStorage.removeItem('simpliers_admin_token');
+      document.getElementById('dashboard-panel').style.display = 'none';
+      document.getElementById('login-panel').style.display = 'block';
+    }
+
+    function showDashboard() {
+      document.getElementById('login-panel').style.display = 'none';
+      document.getElementById('dashboard-panel').style.display = 'block';
+    }
+
+    async function loadWinners() {
+      const listContainer = document.getElementById('winner-list');
+      const countLabel = document.getElementById('winner-count-label');
+      const addSection = document.getElementById('add-winner-section');
+
+      try {
+        const data = await window.SimpliersBackendAPI.getAdminWinners(authToken);
+        const winners = data.winners || [];
+        countLabel.textContent = winners.length;
+
+        if (winners.length === 0) {
+          listContainer.innerHTML = `
+            <div class="empty-state">
+              <i class="fa fa-user-slash"></i>
+              <p>No preset winners saved yet.<br><span style="font-size:12px;">Add a winner value above to force matches on Excel upload.</span></p>
+            </div>
+          `;
+        } else {
+          listContainer.innerHTML = winners.map((name, idx) => `
+            <div class="winner-item">
+              <div class="winner-info">
+                <div class="winner-trophy">
+                  <i class="fa fa-trophy"></i>
+                </div>
+                <div>
+                  <div class="winner-name">${escapeHtml(name)}</div>
+                  <div class="winner-badge">Winner Priority #${idx + 1}</div>
+                </div>
+              </div>
+              <button onclick="handleDeleteWinner('${escapeHtml(name)}')" class="btn-delete">
+                <i class="fa fa-trash-alt"></i> Remove
+              </button>
+            </div>
+          `).join('');
+        }
+
+        addSection.style.opacity = '1';
+        addSection.style.pointerEvents = 'auto';
+
+      } catch (err) {
+        if (err.message && err.message.includes('Unauthorized')) {
+          handleLogout();
+        } else {
+          showAlert(err.message, 'alert-error');
+        }
+      }
+    }
+
+    async function handleAddWinner() {
+      const nameInput = document.getElementById('new-winner-name');
+      const name = nameInput.value.trim();
+      const addBtn = document.getElementById('btn-add');
+
+      if (!name) {
+        showAlert('Please type a participant name.', 'alert-error');
+        nameInput.focus();
+        return;
+      }
+
+      addBtn.disabled = true;
+      addBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+
+      try {
+        await window.SimpliersBackendAPI.addAdminWinner(name, authToken);
+        nameInput.value = '';
+        showAlert(`Preset winner "${name}" added successfully!`, 'alert-success');
+        await loadWinners();
+      } catch (err) {
+        showAlert(err.message, 'alert-error');
+      } finally {
+        addBtn.disabled = false;
+        addBtn.innerHTML = '<i class="fa fa-plus"></i> Add';
+      }
+    }
+
+    async function handleDeleteWinner(name) {
+      if (!confirm(`Remove "${name}" from preset winners?`)) return;
+
+      try {
+        await window.SimpliersBackendAPI.deleteAdminWinner(name, authToken);
+        showAlert(`Winner "${name}" removed.`, 'alert-success');
+        await loadWinners();
+      } catch (err) {
+        showAlert(err.message, 'alert-error');
+      }
+    }
+
+    function showAlert(msg, cls) {
+      const alertBox = document.getElementById('dash-alert');
+      alertBox.className = `alert ${cls}`;
+      alertBox.textContent = msg;
+      alertBox.style.display = 'flex';
+      setTimeout(() => {
+        alertBox.style.display = 'none';
+      }, 3500);
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str || '';
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
