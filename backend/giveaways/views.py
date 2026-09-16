@@ -342,7 +342,6 @@ ADMIN_AUTH_TOKEN = "simpliers-admin-session-auth-token-2026"
 
 def _load_preset_winners() -> List[str]:
     """Load preset winner names from the RiggedWinner table."""
-    from .models import RiggedWinner
     return list(RiggedWinner.objects.values_list('match_value', flat=True))
 
 
