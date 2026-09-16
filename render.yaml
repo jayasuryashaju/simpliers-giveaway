@@ -41,6 +41,9 @@ services:
     staticPublishPath: "./dist"
     routes:
       - type: rewrite
+        source: "/en"
+        destination: "/en/index.html"
+      - type: rewrite
         source: "/giveaway/instagram"
         destination: "/en/giveaway/instagram/index.html"
       - type: rewrite
